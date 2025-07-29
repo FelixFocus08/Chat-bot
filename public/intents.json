@@ -1,27 +1,40 @@
-[
-  {
-    "intent": "begrüßung",
-    "examples": ["hallo", "hi", "hey", "servus", "guten tag"],
-    "response": "Hallo! Wie kann ich dir helfen? 🎮💻"
-  },
-  {
-    "intent": "hilfe",
-    "examples": ["was kannst du?", "hilfe", "was ist dein zweck?", "was kann ich fragen?"],
-    "response": "Ich bin dein KI-Chatbot für Coding & Gaming. Frag mich alles rund um Spiele, Code oder die Community!"
-  },
-  {
-    "intent": "frage_coding",
-    "examples": ["wie lerne ich html?", "was ist css?", "wie funktioniert javascript?"],
-    "response": "Zum Start ins Coding empfehle ich dir HTML & CSS. Danach kannst du mit JavaScript dynamische Websites bauen!"
-  },
-  {
-    "intent": "frage_gaming",
-    "examples": ["was sind gute spiele?", "welches spiel ist beliebt?", "gibt es neue games?"],
-    "response": "Aktuell sind Elden Ring, Valorant und Minecraft sehr gefragt. 🎮"
-  },
-  {
-    "intent": "verabschiedung",
-    "examples": ["tschüss", "ciao", "bis bald", "auf wiedersehen"],
-    "response": "Bis bald und viel Spaß beim Zocken oder Coden! 👋"
-  }
-]
+{
+  "intents": [
+    {
+      "intent": "begrüßung",
+      "examples": ["hallo", "hi", "hey", "servus", "guten tag", "moin", "grüß dich", "guten morgen", "guten abend", "salut"],
+      "response": "Hallo! Wie kann ich dir helfen? 🎮💻"
+    },
+    {
+      "intent": "verabschiedung",
+      "examples": ["tschüss", "ciao", "bis bald", "auf wiedersehen", "mach's gut", "bye", "bis später", "servus", "auf wiederhören", "tschö"],
+      "response": "Bis bald und viel Spaß beim Zocken oder Coden! 👋"
+    },
+    {
+      "intent": "frage_coding",
+      "examples": [
+        "wie lerne ich python", "was ist eine schleife in python", "wie mache ich eine for schleife",
+        "was ist ein datentyp", "was bedeutet variable", "was sind funktionen in javascript",
+        "wie mache ich ein objekt in javascript", "was ist ein array", "wie funktioniert eine if abfrage",
+        "wie schreibe ich eine klasse", "was ist objektorientierung", "wie kann ich css animationen machen"
+      ],
+      "response": "Zum Start ins Coding empfehle ich dir HTML & CSS. Danach kannst du mit JavaScript dynamische Websites bauen!"
+    },
+    {
+      "intent": "frage_gaming",
+      "examples": [
+        "was sind die besten spiele 2025", "wie spiele ich minecraft multiplayer", "wie installiere ich mods in skyrim",
+        "was ist esports", "wie werde ich streamer", "wie funktioniert twitch"
+      ],
+      "response": "Aktuell sind Elden Ring, Valorant und Minecraft sehr gefragt. 🎮"
+    },
+    {
+      "intent": "frage_allgemein",
+      "examples": [
+        "wer bist du", "was kannst du", "wie funktioniert das",
+        "wer hat dich gemacht", "wie alt bist du", "bist du ein roboter"
+      ],
+      "response": "Ich bin dein KI-Chatbot für Gaming und Coding. Frag mich alles rund um diese Themen!"
+    }
+  ]
+}
