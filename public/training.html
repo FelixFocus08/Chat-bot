@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Chatbot Training - Keywords & Antworten</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 1rem;
+      max-width: 720px;
+      margin: auto;
+    }
+    h1 {
+      color: var(--accent);
+      margin-bottom: 1rem;
+    }
+    label {
+      display: block;
+      margin-top: 1rem;
+      margin-bottom: 0.25rem;
+    }
+    input[type=text], textarea, select {
+      width: 100%;
+      padding: 0.5rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--input-bg);
+      color: var(--text);
+    }
+    button {
+      margin-top: 1rem;
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #682ed3;
+    }
+    #intents-list {
+      margin-top: 2rem;
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      background: var(--input-bg);
+    }
+    .intent-item {
+      margin-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+    }
+    .intent-item:last-child {
+      border-bottom: none;
+    }
+    .intent-keywords {
+      font-style: italic;
+      font-size: 0.9rem;
+      margin-bottom: 0.25rem;
+    }
+    .intent-response {
+      font-weight: bold;
+    }
+    .message {
+      margin-top: 1rem;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Chatbot Training – Keywords & Antworten</h1>
+
+  <form id="training-form">
+    <label for="intent">Intent (Kategorie):</label>
+    <select id="intent" required>
+      <option value="" disabled selected>Wähle eine Kategorie</option>
+      <option value="frage_coding">Coding</option>
+      <option value="frage_gaming">Gaming</option>
+      <option value="frage_allgemein">Allgemein</option>
+      <option value="begrüßung">Begrüßung</option>
+      <option value="verabschiedung">Verabschiedung</option>
+    </select>
+
+    <label for="keywords">Keywords (Beispiele, komma-getrennt):</label>
+    <textarea id="keywords" rows="3" placeholder="z.B. wie lerne ich javascript, was ist eine funktion" required></textarea>
+
+    <label for="response">Antwort:</label>
+    <textarea id="response" rows="3" placeholder="Antwort des Bots" required></textarea>
+
+    <button type="submit">Intent hinzufügen / aktualisieren</button>
+  </form>
+
+  <div id="message" class="message"></div>
+
+  <div id="intents-list" aria-live="polite" aria-relevant="additions removals">
+    <!-- Liste der Intents wird hier angezeigt -->
+  </div>
+
+  <script>
+    // Farben & Variablen aus CSS root
+    const rootStyles = getComputedStyle(document.documentElement);
+    document.body.style.background = rootStyles.getPropertyValue('--bg');
+    document.body.style.color = rootStyles.getPropertyValue('--text');
+
+    const form = document.getElementById('training-form');
+    const intentSelect = document.getElementById('intent');
+    const keywordsInput = document.getElementById('keywords');
+    const responseInput = document.getElementById('response');
+    const messageEl = document.getElementById('message');
+    const intentsListEl = document.getElementById('intents-list');
+
+    // Lade gespeicherte Intents aus localStorage oder lade default aus intents.json
+    let intents = [];
+
+    async function loadIntents() {
+      const saved = localStorage.getItem('chatbot_intents');
+      if (saved) {
+        try {
+          intents = JSON.parse(saved);
+          renderIntents();
+          return;
+        } catch {
+          // falls defekt, fallback:
+          intents = [];
+        }
+      }
+      // Lade aus intents.json
+      try {
+        const res = await fetch('intents.json');
+        const data = await res.json();
+        intents = data.intents || [];
+        renderIntents();
+      } catch (e) {
+        intents = [];
+      }
+    }
+
+    function saveIntents() {
+      localStorage.setItem('chatbot_intents', JSON.stringify(intents));
+    }
+
+    function renderIntents() {
+      if (intents.length === 0) {
+        intentsListEl.innerHTML = "<p>Keine Intents gefunden.</p>";
+        return;
+      }
+      intentsListEl.innerHTML = '';
+      intents.forEach((intent, i) => {
+        const div = document.createElement('div');
+        div.className = 'intent-item';
+        div.innerHTML = `
+          <div><strong>Intent:</strong> ${intent.intent}</div>
+          <div class="intent-keywords">Beispiele: ${intent.examples.join(', ')}</div>
+          <div class="intent-response">Antwort: ${intent.response}</div>
+          <button aria-label="Intent löschen" data-index="${i}" class="delete-btn">Löschen</button>
+        `;
+        intentsListEl.appendChild(div);
+      });
+      // Eventlistener für Löschen
+      document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.onclick = e => {
+          const idx = +e.target.dataset.index;
+          if (confirm(`Intent '${intents[idx].intent}' wirklich löschen?`)) {
+            intents.splice(idx, 1);
+            saveIntents();
+            renderIntents();
+          }
+        };
+      });
+    }
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const intent = intentSelect.value.trim();
+      const keywords = keywordsInput.value.split(',').map(s => s.trim()).filter(Boolean);
+      const response = responseInput.value.trim();
+      if (!intent || keywords.length === 0 || !response) {
+        messageEl.textContent = "Bitte alle Felder ausfüllen.";
+        return;
+      }
+      // Prüfe ob Intent mit gleichem Namen schon existiert
+      const idx = intents.findIndex(i => i.intent === intent);
+      if (idx >= 0) {
+        // Intent existiert, ergänze Keywords & aktualisiere Antwort
+        const existing = intents[idx];
+        const newExamples = [...new Set([...existing.examples, ...keywords])];
+        intents[idx] = {
+          intent: intent,
+          examples: newExamples,
+          response: response
+        };
+      } else {
+        // Neu hinzufügen
+        intents.push({
+          intent,
+          examples: keywords,
+          response
+        });
+      }
+      saveIntents();
+      renderIntents();
+      messageEl.textContent = "Intent gespeichert!";
+      form.reset();
+      intentSelect.selectedIndex = 0;
+    });
+
+    loadIntents();
+  </script>
+</body>
+</html>
